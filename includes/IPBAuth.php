@@ -135,9 +135,9 @@ class IPBAuth
                     if ($stmt->num_rows == 1) {
                         $stmt->bind_result($name);
                         if ($stmt->fetch()) {
-							// Updated static method to be non-static
-                        	$userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
-                        	$username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
+                            // Updated static method to be non-static
+                            $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
+                            $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
                             if ($username) {
                                 return $username;
                             }
@@ -225,13 +225,13 @@ class IPBAuth
                             $groupmap = $cfg->get('IPBGroupMap');
                             if (is_array($groupmap)) {
                                 foreach ($groupmap as $ug_wiki => $ug_ipb) {
-                                	// Updated static method to be non-static
-									$userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
-									$user_has_ug = in_array($ug_wiki, $userGroupManager->getUserEffectiveGroups( $user )) ?: $user_has_ug;
+                                    // Updated static method to be non-static
+                                    $userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
+                                    $user_has_ug = in_array($ug_wiki, $userGroupManager->getUserEffectiveGroups( $user )) ?: $user_has_ug;
                                     if (!empty(array_intersect((array)$ug_ipb, $groups)) && !$user_has_ug) {
-										$userGroupManager->addUserToGroup( $user, $ug_wiki );
+                                        $userGroupManager->addUserToGroup( $user, $ug_wiki );
                                     } elseif (empty(array_intersect((array)$ug_ipb, $groups)) && $user_has_ug) {
-										$userGroupManager->removeUserFromGroup( $user, $ug_wiki );
+                                        $userGroupManager->removeUserFromGroup( $user, $ug_wiki );
                                     }
                                 }
                             }

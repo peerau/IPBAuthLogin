@@ -123,7 +123,7 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
                         }
                     }
                     if ($success) {
-						// Updated static method to be non-static
+                        // Updated static method to be non-static
                         $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
                         $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
                         if (!$username) {
