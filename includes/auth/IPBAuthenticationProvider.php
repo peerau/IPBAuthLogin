@@ -29,7 +29,9 @@ use MediaWiki\Auth\PrimaryAuthenticationProvider;
 
 use Hooks;
 use StatusValue;
-use User;
+
+use MediaWiki\User\UserNameUtils;
+use MediaWiki\MediaWikiServices;
 
 class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
 {
@@ -121,7 +123,9 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
                         }
                     }
                     if ($success) {
-                        $username = User::getCanonicalName($name, 'creatable');
+                        // Updated static method to be non-static
+                        $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
+                        $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
                         if (!$username) {
                             $username = $req->username;
                         }
@@ -156,7 +160,7 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
 
     public static function onUserLoggedIn($user)
     {
-        // When a user logs in, update the local account with information from the IPB database.
+        // When a user logs in, update the local account with information from the IPB database
         IPBAuth::updateUser($user);
     }
 

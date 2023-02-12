@@ -23,5 +23,5 @@ use MediaWiki\Auth\PasswordAuthenticationRequest;
 
 class IPBAuthenticationRequest extends PasswordAuthenticationRequest
 {
-
+	// Authentication request is not implemented
 }

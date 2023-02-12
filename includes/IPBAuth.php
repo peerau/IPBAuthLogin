@@ -20,8 +20,10 @@
 namespace IPBLoginAuth;
 
 use ConfigFactory;
-use User;
-use UserGroupManager;
+
+use MediaWiki\User\UserNameUtils;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserGroupManager;
 
 class IPBAuth
 {
@@ -88,7 +90,7 @@ class IPBAuth
     }
 
     /**
-     * Normalizes a username based on the usernames stored in teh forum database.
+     * Normalizes a username based on the usernames stored in the forum database
      *
      * @param $username
      * @return string
@@ -133,7 +135,9 @@ class IPBAuth
                     if ($stmt->num_rows == 1) {
                         $stmt->bind_result($name);
                         if ($stmt->fetch()) {
-                            $username = User::getCanonicalName($name, 'creatable');
+                            // Updated static method to be non-static
+                            $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
+                            $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
                             if ($username) {
                                 return $username;
                             }
@@ -150,7 +154,7 @@ class IPBAuth
     }
 
     /**
-     * Updates a \User object with data from the IPB forum database.
+     * Updates a \User object with data from the IPB forum database
      *
      * @param $user
      */
@@ -221,11 +225,13 @@ class IPBAuth
                             $groupmap = $cfg->get('IPBGroupMap');
                             if (is_array($groupmap)) {
                                 foreach ($groupmap as $ug_wiki => $ug_ipb) {
-                                    $user_has_ug = in_array($ug_wiki, UserGroupManager::getUserEffectiveGroups($user));
+                                    // Updated static method to be non-static
+                                    $userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
+                                    $user_has_ug = in_array($ug_wiki, $userGroupManager->getUserEffectiveGroups( $user )) ?: $user_has_ug;
                                     if (!empty(array_intersect((array)$ug_ipb, $groups)) && !$user_has_ug) {
-                                        UserGroupManager::addUserToGroup($user,$ug_wiki);
+                                        $userGroupManager->addUserToGroup( $user, $ug_wiki );
                                     } elseif (empty(array_intersect((array)$ug_ipb, $groups)) && $user_has_ug) {
-                                        UserGroupManager::removeUserFromGroup($user,$ug_wiki);
+                                        $userGroupManager->removeUserFromGroup( $user, $ug_wiki );
                                     }
                                 }
                             }
@@ -242,7 +248,7 @@ class IPBAuth
     }
 
     /**
-     * Verifies whether a username is already in use in the IPB forum database.
+     * Verifies whether a username is already in use in the IPB forum database
      *
      * @param $username
      * @return bool
@@ -284,7 +290,7 @@ class IPBAuth
     }
 
     /**
-     * Verifies if a supplied password matches the password hash in the IPB database.
+     * Verifies if a supplied password matches the password hash in the IPB database
      *
      * @param $password
      * @param $hash
