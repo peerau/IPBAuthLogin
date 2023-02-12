@@ -1,6 +1,6 @@
 <?php
 /*
-    IPBLoginAuth is a MediaWiki extension which authenticates users through an IPB forums database.
+    IPBAuthLogin is a MediaWiki extension which authenticates users through an IPB forums database.
     Copyright (C) 2016  Frédéric Hannes
 
     This program is free software: you can redistribute it and/or modify
@@ -17,14 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-if (function_exists('wfLoadExtension')) {
-    wfLoadExtension('IPBLoginAuth');
-    $wgMessagesDirs['IPBLoginAuth'] = __DIR__ . '/i18n';
+if (function_exists( 'wfLoadExtension' ) ) {
+    wfLoadExtension( 'IPBAuthLogin' );
+    $wgMessagesDirs['IPBAuthLogin'] = __DIR__ . '/i18n';
     wfWarn(
-        'Deprecated PHP entry point used for IPBLoginAuth extension. Please use wfLoadExtension instead, ' .
+        'Deprecated PHP entry point used for IPBAuthLogin extension. Please use wfLoadExtension instead, ' .
         'see https://www.mediawiki.org/wiki/Extension_registration for more details.'
     );
     return;
 } else {
-    die('This version of the IPBLoginAuth extension requires MediaWiki 1.27+');
+    die( 'This version of the IPBAuthLogin extension requires MediaWiki 1.35+' );
 }

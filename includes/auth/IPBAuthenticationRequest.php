@@ -1,6 +1,6 @@
 <?php
 /*
-    IPBLoginAuth is a MediaWiki extension which authenticates users through an IPB forums database.
+    IPBAuthLogin is a MediaWiki extension which authenticates users through an IPB forums database.
     Copyright (C) 2016  Frédéric Hannes
 
     This program is free software: you can redistribute it and/or modify
@@ -17,11 +17,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace IPBLoginAuth\Auth;
+namespace IPBAuthLogin\Auth;
 
 use MediaWiki\Auth\PasswordAuthenticationRequest;
 
 class IPBAuthenticationRequest extends PasswordAuthenticationRequest
 {
-	// Authentication request is not implemented
+    // Authentication request is not implemented
 }

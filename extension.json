@@ -1,31 +1,31 @@
 {
-    "name": "IPBLoginAuth",
+    "name": "IPBAuthLogin",
     "version": "1.0.3",
     "author": "Frédéric Hannes",
     "url": "https://www.mediawiki.org/wiki/Extension:IPBAuthLogin",
-    "descriptionmsg": "ipbloginauth-desc",
-    "license-name": "GPLv3",
+    "descriptionmsg": "ipbauthlogin-desc",
+    "license-name": "GPL-3.0-or-later",
     "type": "auth",
     "requires": {
-        "MediaWiki": ">=1.35.0"
+        "MediaWiki": ">= 1.35.0"
     },
     "ConfigRegistry": {
-        "ipbloginauth": "GlobalVarConfig::newInstance"
+        "ipbauthlogin": "GlobalVarConfig::newInstance"
     },
     "MessagesDirs": {
-        "IPBLoginAuth": [
+        "IPBAuthLogin": [
             "i18n"
         ]
     },
     "AutoloadClasses": {
-        "IPBLoginAuth\\Auth\\IPBAuthenticationProvider": "includes/auth/IPBAuthenticationProvider.php",
-        "IPBLoginAuth\\Auth\\IPBAuthenticationRequest": "includes/auth/IPBAuthenticationRequest.php",
-        "IPBLoginAuth\\IPBAuth": "includes/IPBAuth.php"
+        "IPBAuthLogin\\Auth\\IPBAuthenticationProvider": "includes/auth/IPBAuthenticationProvider.php",
+        "IPBAuthLogin\\Auth\\IPBAuthenticationRequest": "includes/auth/IPBAuthenticationRequest.php",
+        "IPBAuthLogin\\IPBAuth": "includes/IPBAuth.php"
     },
     "AuthManagerAutoConfig": {
         "primaryauth": {
-            "IPBLoginAuth\\Auth\\IPBAuthenticationProvider": {
-                "class": "IPBLoginAuth\\Auth\\IPBAuthenticationProvider",
+            "IPBAuthLogin\\Auth\\IPBAuthenticationProvider": {
+                "class": "IPBAuthLogin\\Auth\\IPBAuthenticationProvider",
                 "sort": 0
             }
         }
