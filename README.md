@@ -30,7 +30,7 @@ Using [Composer](https://getcomposer.org/): This extension can now utilize [Medi
 ```
 {
 	"require": {
-                  "mediawiki/ipb-auth-login": "~1.0.4"
+                  "mediawiki/ipb-auth-login": "~1.0.3"
         }
 }
 ```
