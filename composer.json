@@ -1,5 +1,5 @@
 {
-    "name": "mediawiki/ipb-auth-login",
+    "name": "mediawikiext/ipb-auth-login",
     "type": "mediawiki-extension",
     "description": "Log into the MediaWiki installation using IPB user accounts.",
     "keywords": [
