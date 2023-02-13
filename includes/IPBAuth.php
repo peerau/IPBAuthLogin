@@ -1,6 +1,6 @@
 <?php
 /*
-    IPBLoginAuth is a MediaWiki extension which authenticates users through an IPB forums database.
+    IPBAuthLogin is a MediaWiki extension which authenticates users through an IPB forums database.
     Copyright (C) 2016  Frédéric Hannes
 
     This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace IPBLoginAuth;
+namespace IPBAuthLogin;
 
 use ConfigFactory;
 
@@ -37,8 +37,8 @@ class IPBAuth
      */
     public static function getConfig()
     {
-        if (self::$config === null) {
-            self::$config = ConfigFactory::getDefaultInstance()->makeConfig('ipbloginauth');
+        if ( self::$config === null ) {
+            self::$config = ConfigFactory::getDefaultInstance()->makeConfig( 'ipbauthlogin' );
         }
         return self::$config;
     }
@@ -52,10 +52,10 @@ class IPBAuth
     {
         $cfg = IPBAuth::getConfig();
         return @new \mysqli(
-            $cfg->get('IPBDBHost'),
-            $cfg->get('IPBDBUsername'),
-            $cfg->get('IPBDBPassword'),
-            $cfg->get('IPBDBDatabase')
+            $cfg->get( 'IPBDBHost' ),
+            $cfg->get( 'IPBDBUsername' ),
+            $cfg->get( 'IPBDBPassword' ),
+            $cfg->get( 'IPBDBDatabase' )
         );
     }
 
@@ -66,25 +66,25 @@ class IPBAuth
      * @param $value
      * @return string
      */
-    public static function cleanValue($value)
+    public static function cleanValue( $value )
     {
-        if ($value == "") {
+        if ( $value == "" ) {
             return "";
         }
 
-        $value = preg_replace('/\\\(?!&amp;#|\?#)/', "&#092;", $value);
-        $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5);
-        $value = str_replace("&#032;", " ", $value);
-        $value = str_replace(array("\r\n", "\n\r", "\r"), "\n", $value);
-        $value = str_replace("<!--", "&#60;&#33;--", $value);
-        $value = str_replace("-->", "--&#62;", $value);
-        $value = str_ireplace("<script", "&#60;script", $value);
-        $value = str_replace("\n", "<br />", $value);
-        $value = str_replace("$", "&#036;", $value);
-        $value = str_replace("!", "&#33;", $value);
+        $value = preg_replace( '/\\\(?!&amp;#|\?#)/', "&#092;", $value );
+        $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5 );
+        $value = str_replace( "&#032;", " ", $value );
+        $value = str_replace( array("\r\n", "\n\r", "\r"), "\n", $value );
+        $value = str_replace( "<!--", "&#60;&#33;--", $value );
+        $value = str_replace( "-->", "--&#62;", $value );
+        $value = str_ireplace( "<script", "&#60;script", $value );
+        $value = str_replace( "\n", "<br />", $value );
+        $value = str_replace( "$", "&#036;", $value );
+        $value = str_replace( "!", "&#33;", $value );
         // UNICODE
-        $value = preg_replace("/&amp;#([0-9]+);/s", "&#\\1;", $value);
-        $value = preg_replace('/&#(\d+?)([^\d;])/i', "&#\\1;\\2", $value);
+        $value = preg_replace( "/&amp;#([0-9]+);/s", "&#\\1;", $value );
+        $value = preg_replace( '/&#(\d+?)([^\d;])/i', "&#\\1;\\2", $value );
 
         return $value;
     }
@@ -95,26 +95,26 @@ class IPBAuth
      * @param $username
      * @return string
      */
-    public static function normalizeUsername($username)
+    public static function normalizeUsername( $username )
     {
         $originalname = $username;
         $cfg = IPBAuth::getConfig();
         $sql = IPBAuth::getSQL();
         try {
-            $username = IPBAuth::cleanValue($username);
-            $username = $sql->real_escape_string($username);
-            $prefix = $cfg->get('IPBDBPrefix');
-            $ipbver = $cfg->get('IPBVersion');
-            if ($ipbver >= 4) {
+            $username = IPBAuth::cleanValue( $username );
+            $username = $sql->real_escape_string( $username );
+            $prefix = $cfg->get( 'IPBDBPrefix' );
+            $ipbver = $cfg->get( 'IPBVersion' );
+            if ( $ipbver >= 4 ) {
                 $prefix .= 'core_';
             }
 
             // Check underscores
-            $us_username = str_replace(" ", "_", $username);
-            $stmt = $sql->prepare("SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)");
-            if ($stmt) {
+            $us_username = str_replace( " ", "_", $username );
+            $stmt = $sql->prepare( "SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('s', $us_username);
+                    $stmt->bind_param( 's', $us_username );
                     $stmt->execute();
                     $stmt->store_result();
                     if ($stmt->num_rows == 1) {
@@ -126,19 +126,19 @@ class IPBAuth
             }
 
             // Update user
-            $stmt = $sql->prepare("SELECT name FROM {$prefix}members WHERE lower(name) = lower(?)");
-            if ($stmt) {
+            $stmt = $sql->prepare( "SELECT name FROM {$prefix}members WHERE lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('s', $username);
+                    $stmt->bind_param( 's', $username );
                     $stmt->execute();
                     $stmt->store_result();
-                    if ($stmt->num_rows == 1) {
-                        $stmt->bind_result($name);
-                        if ($stmt->fetch()) {
+                    if ( $stmt->num_rows == 1 ) {
+                        $stmt->bind_result( $name );
+                        if ( $stmt->fetch() ) {
                             // Updated static method to be non-static
                             $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
                             $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
-                            if ($username) {
+                            if ( $username ) {
                                 return $username;
                             }
                         }
@@ -158,16 +158,16 @@ class IPBAuth
      *
      * @param $user
      */
-    public static function updateUser(&$user)
+    public static function updateUser( &$user )
     {
         $cfg = IPBAuth::getConfig();
         $sql = IPBAuth::getSQL();
         try {
-            $username = IPBAuth::cleanValue($user->getName());
-            $username = $sql->real_escape_string($username);
-            $prefix = $cfg->get('IPBDBPrefix');
-            $ipbver = $cfg->get('IPBVersion');
-            if ($ipbver >= 4) {
+            $username = IPBAuth::cleanValue( $user->getName() );
+            $username = $sql->real_escape_string( $username );
+            $prefix = $cfg->get( 'IPBDBPrefix' );
+            $ipbver = $cfg->get( 'IPBVersion' );
+            if ( $ipbver >= 4 ) {
                 $prefix .= 'core_';
                 $name_field = 'name';
             } else {
@@ -175,11 +175,11 @@ class IPBAuth
             }
 
             // Check underscores
-            $us_username = str_replace(" ", "_", $username);
-            $stmt = $sql->prepare("SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)");
-            if ($stmt) {
+            $us_username = str_replace( " ", "_", $username );
+            $stmt = $sql->prepare( "SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('s', $us_username);
+                    $stmt->bind_param( 's', $us_username );
                     $stmt->execute();
                     $stmt->store_result();
                     if ($stmt->num_rows == 1) {
@@ -191,27 +191,27 @@ class IPBAuth
             }
 
             // Update user
-            $stmt = $sql->prepare("SELECT member_id, member_group_id, mgroup_others, email, {$name_field} FROM {$prefix}members WHERE lower(name) = lower(?)");
-            if ($stmt) {
+            $stmt = $sql->prepare( "SELECT member_id, member_group_id, mgroup_others, email, {$name_field} FROM {$prefix}members WHERE lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('s', $username);
+                    $stmt->bind_param( 's', $username );
                     $stmt->execute();
                     $stmt->store_result();
                     if ($stmt->num_rows == 1) {
-                        $stmt->bind_result($member_id, $member_group_id, $mgroup_others, $email, $members_display_name);
-                        if ($stmt->fetch()) {
-                            $user->setEmail($email);
-                            if ($ipbver == 4) {
-                                if ($member_group_id != $cfg->get('IPBGroupValidating')) {
+                        $stmt->bind_result( $member_id, $member_group_id, $mgroup_others, $email, $members_display_name );
+                        if ( $stmt->fetch() ) {
+                            $user->setEmail( $email );
+                            if ( $ipbver == 4 ) {
+                                if ( $member_group_id != $cfg->get( 'IPBGroupValidating' ) ) {
                                     $user->confirmEmail();
                                 }
-                            } elseif ($ipbver > 4) { // 4.6? changed validating members to a different table
-                                $vals = $sql->prepare("SELECT vid FROM {$prefix}validating WHERE member_id = ? AND lost_pass != 1 AND forgot_security != 1");
-                                if ($vals) {
+                            } elseif ( $ipbver > 4 ) { // 4.6? changed validating members to a different table
+                                $vals = $sql->prepare( "SELECT vid FROM {$prefix}validating WHERE member_id = ? AND lost_pass != 1 AND forgot_security != 1" );
+                                if ( $vals ) {
                                     try {
-                                        $vals->bind_param('i', $member_id);
+                                        $vals->bind_param( 'i', $member_id );
                                         $vals->execute();
-                                        if ($vals->num_rows > 0) { // it will return >=1 rows if the user is validating
+                                        if ( $vals->num_rows > 0 ) { // it will return >=1 rows if the user is validating
                                             $user->confirmEmail();
                                         }
                                     } finally {
@@ -219,18 +219,18 @@ class IPBAuth
                                     } 
                                 }
                             }
-                            $user->setRealName($members_display_name);
-                            $groups = explode(",", $mgroup_others);
+                            $user->setRealName( $members_display_name );
+                            $groups = explode( ",", $mgroup_others );
                             $groups[] = $member_group_id;
-                            $groupmap = $cfg->get('IPBGroupMap');
-                            if (is_array($groupmap)) {
-                                foreach ($groupmap as $ug_wiki => $ug_ipb) {
+                            $groupmap = $cfg->get( 'IPBGroupMap' );
+                            if (is_array( $groupmap ) ) {
+                                foreach ( $groupmap as $ug_wiki => $ug_ipb ) {
                                     // Updated static method to be non-static
                                     $userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
-                                    $user_has_ug = in_array($ug_wiki, $userGroupManager->getUserEffectiveGroups( $user )) ?: $user_has_ug;
-                                    if (!empty(array_intersect((array)$ug_ipb, $groups)) && !$user_has_ug) {
+                                    $user_has_ug = in_array( $ug_wiki, $userGroupManager->getUserEffectiveGroups( $user ) ) ?: $user_has_ug;
+                                    if ( !empty(array_intersect( ( array )$ug_ipb, $groups ) ) && !$user_has_ug ) {
                                         $userGroupManager->addUserToGroup( $user, $ug_wiki );
-                                    } elseif (empty(array_intersect((array)$ug_ipb, $groups)) && $user_has_ug) {
+                                    } elseif ( empty(array_intersect( ( array )$ug_ipb, $groups ) ) && $user_has_ug ) {
                                         $userGroupManager->removeUserFromGroup( $user, $ug_wiki );
                                     }
                                 }
@@ -253,28 +253,28 @@ class IPBAuth
      * @param $username
      * @return bool
      */
-    public static function userExists($username)
+    public static function userExists( $username )
     {
         $sql = IPBAuth::getSQL();
         try {
-            if ($sql->connect_errno) {
+            if ( $sql->connect_errno ) {
                 return false;
             }
 
-            $username = IPBAuth::cleanValue($username);
-            $username = $sql->real_escape_string($username);
-            $prefix = $cfg->get('IPBDBPrefix');
-            $ipbver = $cfg->get('IPBVersion');
-            if ($ipbver >= 4) {
+            $username = IPBAuth::cleanValue( $username );
+            $username = $sql->real_escape_string( $username );
+            $prefix = $cfg->get( 'IPBDBPrefix' );
+            $ipbver = $cfg->get( 'IPBVersion' );
+            if ( $ipbver >= 4 ) {
                 $prefix .= 'core_';
             }
 
             // Check underscores
-            $us_username = str_replace(" ", "_", $username);
-            $stmt = $sql->prepare("SELECT email FROM {$prefix}members WHERE lower(name) = lower(?) OR lower(name) = lower(?)");
-            if ($stmt) {
+            $us_username = str_replace( " ", "_", $username );
+            $stmt = $sql->prepare( "SELECT email FROM {$prefix}members WHERE lower(name) = lower(?) OR lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('ss', $username, $us_username);
+                    $stmt->bind_param( 'ss', $username, $us_username );
                     $stmt->execute();
                     $stmt->store_result();
                     return $stmt->num_rows == 1;
@@ -297,25 +297,25 @@ class IPBAuth
      * @param $salt
      * @return bool
      */
-    public static function checkIPBPassword($password, $hash, $salt)
+    public static function checkIPBPassword( $password, $hash, $salt )
     {
         /* IPB uses a different method in 3.x, 4.0 and 4.4 */
-        if ($salt == NULL) {
+        if ( $salt == NULL ) {
             /* IPB 4.4+ */
-            return password_verify($password, $hash);
+            return password_verify( $password, $hash );
             
-        } elseif  ( mb_strlen( $salt ) === 22 )	{
+        } elseif  ( mb_strlen( $salt ) === 22 ) {
             /* IPB 4.0 */
             $generatedHash = crypt( $password, '$2a$13$' . $salt );
-            return ($generatedHash == $hash);
+            return ( $generatedHash == $hash );
 
         } else {
             /* 3.x */
-            $password = IPBAuth::cleanValue($password);
-            $generatedHash = md5(md5($salt) . md5($password));
-            return ($generatedHash == $hash);
+            $password = IPBAuth::cleanValue( $password );
+            $generatedHash = md5( md5( $salt ) . md5( $password ) );
+            return ( $generatedHash == $hash );
 
-		}
+        }
     }
 
 }

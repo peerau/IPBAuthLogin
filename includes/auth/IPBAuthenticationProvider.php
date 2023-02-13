@@ -1,6 +1,6 @@
 <?php
 /*
-    IPBLoginAuth is a MediaWiki extension which authenticates users through an IPB forums database.
+    IPBAuthLogin is a MediaWiki extension which authenticates users through an IPB forums database.
     Copyright (C) 2016  Frédéric Hannes
 
     This program is free software: you can redistribute it and/or modify
@@ -17,9 +17,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace IPBLoginAuth\Auth;
+namespace IPBAuthLogin\Auth;
 
-use IPBLoginAuth\IPBAuth;
+use IPBAuthLogin\IPBAuth;
 
 use MediaWiki\Auth\AbstractPrimaryAuthenticationProvider;
 use MediaWiki\Auth\AuthenticationRequest;
@@ -38,10 +38,10 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
 
     public function __construct()
     {
-        Hooks::register('UserLoggedIn', [$this, 'onUserLoggedIn']);
+        Hooks::register( 'UserLoggedIn', [$this, 'onUserLoggedIn'] );
     }
 
-    public function autoCreatedAccount($user, $source)
+    public function autoCreatedAccount( $user, $source )
     {
 
     }
@@ -51,35 +51,35 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
         return PrimaryAuthenticationProvider::TYPE_NONE;
     }
 
-    public function beginPrimaryAccountCreation($user, $creator, array $reqs)
+    public function beginPrimaryAccountCreation( $user, $creator, array $reqs )
     {
         return AuthenticationResponse::ABSTAIN;
     }
 
-    public function beginPrimaryAuthentication(array $reqs)
+    public function beginPrimaryAuthentication( array $reqs )
     {
-        $req = AuthenticationRequest::getRequestByClass($reqs, IPBAuthenticationRequest::class);
-        if (!$req) {
+        $req = AuthenticationRequest::getRequestByClass( $reqs, IPBAuthenticationRequest::class );
+        if ( !$req ) {
             return AuthenticationResponse::newFail(
-                wfMessage('unexpected-error')
+                wfMessage( 'unexpected-error' )
             );
         }
 
         $cfg = IPBAuth::getConfig();
         $sql = IPBAuth::getSQL();
         try {
-            if ($sql->connect_errno) {
+            if ( $sql->connect_errno ) {
                 return AuthenticationResponse::newFail(
-                    wfMessage('db-access-error')
+                    wfMessage( 'db-access-error' )
                 );
             }
 
-            $username = IPBAuth::cleanValue($req->username);
-            $username = $sql->real_escape_string($username);
+            $username = IPBAuth::cleanValue( $req->username );
+            $username = $sql->real_escape_string( $username );
             $password = $req->password;
-            $prefix = $cfg->get('IPBDBPrefix');
-            $ipbver = $cfg->get('IPBVersion');
-            if ($ipbver >= 4) {
+            $prefix = $cfg->get( 'IPBDBPrefix' );
+            $ipbver = $cfg->get( 'IPBVersion' );
+            if ( $ipbver >= 4 ) {
                 $prefix .= 'core_';
                 // user group(s) 'ibf_core_groups.g_view_board' value is not checked
                 $ban_check = ' AND temp_ban != -1 AND temp_ban < UNIX_TIMESTAMP()';
@@ -88,11 +88,11 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
             }
 
             // Check underscores
-            $us_username = str_replace(" ", "_", $username);
-            $stmt = $sql->prepare("SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)");
-            if ($stmt) {
+            $us_username = str_replace( " ", "_", $username );
+            $stmt = $sql->prepare( "SELECT email FROM {$prefix}members WHERE lower(name) = lower(?)" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('s', $us_username);
+                    $stmt->bind_param( 's', $us_username );
                     $stmt->execute();
                     $stmt->store_result();
                     if ($stmt->num_rows == 1) {
@@ -103,36 +103,36 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
                 }
             } else {
                 return AuthenticationResponse::newFail(
-                    wfMessage('db-error')
+                    wfMessage( 'db-error' )
                 );
             }
 
             // Check user
-            $stmt = $sql->prepare("SELECT name, members_pass_hash, members_pass_salt FROM {$prefix}members WHERE (lower(name) = lower(?) OR lower(email) = lower(?)) {$ban_check}");
-            if ($stmt) {
+            $stmt = $sql->prepare( "SELECT name, members_pass_hash, members_pass_salt FROM {$prefix}members WHERE (lower(name) = lower(?) OR lower(email) = lower(?)) {$ban_check}" );
+            if ( $stmt ) {
                 try {
-                    $stmt->bind_param('ss', $username, $username);
+                    $stmt->bind_param( 'ss', $username, $username );
                     $stmt->execute();
                     $stmt->store_result();
 
                     $success = false;
-                    if ($stmt->num_rows == 1) {
-                        $stmt->bind_result($name, $members_pass_hash, $members_pass_salt);
+                    if ( $stmt->num_rows == 1 ) {
+                        $stmt->bind_result( $name, $members_pass_hash, $members_pass_salt );
                         if ($stmt->fetch()) {
-                            $success = IPBAuth::checkIPBPassword($password, $members_pass_hash, $members_pass_salt);
+                            $success = IPBAuth::checkIPBPassword( $password, $members_pass_hash, $members_pass_salt );
                         }
                     }
-                    if ($success) {
+                    if ( $success ) {
                         // Updated static method to be non-static
                         $userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
                         $username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_CREATABLE ) ?: $username;
-                        if (!$username) {
+                        if ( !$username ) {
                             $username = $req->username;
                         }
-                        return AuthenticationResponse::newPass($username);
+                        return AuthenticationResponse::newPass( $username );
                     } else {
                         return AuthenticationResponse::newFail(
-                            wfMessage('no-user-error')
+                            wfMessage( 'no-user-error' )
                         );
                     }
                 } finally {
@@ -140,7 +140,7 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
                 }
             } else {
                 return AuthenticationResponse::newFail(
-                    wfMessage('db-error')
+                    wfMessage( 'db-error' )
                 );
             }
         } finally {
@@ -148,9 +148,9 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
         }
     }
 
-    public function getAuthenticationRequests($action, array $options)
+    public function getAuthenticationRequests( $action, array $options )
     {
-        switch ($action) {
+        switch ( $action ) {
             case AuthManager::ACTION_LOGIN:
                 return [new IPBAuthenticationRequest()];
             default:
@@ -158,45 +158,45 @@ class IPBAuthenticationProvider extends AbstractPrimaryAuthenticationProvider
         }
     }
 
-    public static function onUserLoggedIn($user)
+    public static function onUserLoggedIn( $user )
     {
         // When a user logs in, update the local account with information from the IPB database
-        IPBAuth::updateUser($user);
+        IPBAuth::updateUser( $user );
     }
 
-    public function providerAllowsAuthenticationDataChange(AuthenticationRequest $req, $checkData = true)
+    public function providerAllowsAuthenticationDataChange( AuthenticationRequest $req, $checkData = true )
     {
-        if (get_class($req) === IPBAuthenticationRequest::class) {
+        if ( get_class( $req ) === IPBAuthenticationRequest::class ) {
             return StatusValue::newGood();
         } else {
-            return StatusValue::newGood('ignored');
+            return StatusValue::newGood( 'ignored' );
         }
     }
 
-    public function providerAllowsPropertyChange($property)
+    public function providerAllowsPropertyChange( $property )
     {
         // Allow users to change their signature
 	    return $property == 'nickname';
     }
 
-    public function providerChangeAuthenticationData(AuthenticationRequest $req)
+    public function providerChangeAuthenticationData( AuthenticationRequest $req )
     {
         // Account changes are not implemented
     }
 
-    public function providerNormalizeUsername($username)
+    public function providerNormalizeUsername( $username )
     {
-        return IPBAuth::normalizeUsername($username);
+        return IPBAuth::normalizeUsername( $username );
     }
 
-    public function testForAccountCreation($user, $creator, array $reqs)
+    public function testForAccountCreation( $user, $creator, array $reqs )
     {
         // Account creation is not implemented
     }
 
-    public function testUserExists($username, $flags = User::READ_NORMAL)
+    public function testUserExists( $username, $flags = User::READ_NORMAL )
     {
-        return IPBAuth::userExists($username);
+        return IPBAuth::userExists( $username );
     }
 
 }

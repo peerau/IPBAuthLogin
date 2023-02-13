@@ -1,0 +1,30 @@
+{
+    "name": "mediawiki/ipb-auth-login",
+    "type": "mediawiki-extension",
+    "description": "Log into the MediaWiki installation using IPB user accounts.",
+    "keywords": [
+        "MediaWiki",
+        "IPB",
+        "IPS",
+        "login",
+        "authentication"
+    ],
+    "homepage": "https://www.mediawiki.org/wiki/Extension:IPBAuthLogin",
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Frédéric Hannes",
+            "role": "Creator"
+        },
+        {
+            "name": "Jordan Songer",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "extra": {
+        "installer-name": "IPBAuthLogin"
+    }
+}

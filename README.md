@@ -17,7 +17,24 @@ Requirements
 Documentation
 -------------
 
-Extensive documentation for the extension can be found on its [mediawiki.org page](https://www.mediawiki.org/wiki/Extension:IPBAuthLogin).
+Extensive documentation for the extension can be found on its [MediaWiki extension page](https://www.mediawiki.org/wiki/Extension:IPBAuthLogin).
+
+Installation
+------------
+
+This extension can be installed in either of two ways now:
+
+Manual install: Download the tarball from the [MediaWiki extension page](https://www.mediawiki.org/wiki/Extension:IPBAuthLogin).
+
+Using [Composer](https://getcomposer.org/): This extension can now utilize [MediaWiki's built-in support for Composer](https://www.mediawiki.org/wiki/Composer). From the root directory of the MediaWiki installation, create or modify "composer.local.json" with the appropriate variant of following content:
+```
+{
+	"require": {
+                  "mediawiki/ipb-auth-login": "~1.0.3"
+        }
+}
+```
+Using either method, enable the extension according to the instructions provided on the MediaWiki extension page. 
 
 License
 -------
